@@ -1,8 +1,8 @@
 from tkinter import *
 from entryPlaceholder import *
 import pyodbc
-cursor = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-DVVEP7S;DATABASE=FlashAdverts').cursor()
-#cursor = pyodbc.connect('DRIVER={SQL Server};SERVER=PC-CPD-2;DATABASE=FlashAdverts').cursor()
+#cursor = pyodbc.connect('DRIVER={SQL Server};SERVER=DESKTOP-DVVEP7S;DATABASE=FlashAdverts').cursor()
+cursor = pyodbc.connect('DRIVER={SQL Server};SERVER=PC-CPD-2;DATABASE=FlashAdverts').cursor()
 class Campotext:
     def __init__(self,frame,nome,col,linha,show=None,x=None,y=None):
         self.n = nome
@@ -124,14 +124,15 @@ class Login:
         self.login    = Botao('Entra',    self.conteiner1, self.logar, 5, 1, 4)
 
     def logar(self,event):
-        self.email.cor()
         self.senha.cor()
-        dados = cursor.execute('select email,senha from Usuario where email=?',[self.email.get()]).fetchall()
+        dados = cursor.execute('select email,senha,cod_credito from Usuario where email=?',[self.email.get()]).fetchall()
+        if self.email.get() in dados[0]:
+            self.email.cor()
         if dados!=[]:
             if self.senha.get() == dados[0][1]:
                 self.msg['text'] = 'Senha Valida'
-                Usuario(self.master)
                 self.limpa()
+                Usuario(self.master,dados[0][2])
             else:
                 self.msg['text'] = 'Senha Invalida!'
         else:
@@ -143,14 +144,33 @@ class Login:
         self.conteiner1.destroy()
         #self.conteiner2.destroy()
 class Usuario:
-    def __init__(self,master):
-        #master.quit()
-        root.quit()
-        master2 = Tk()
-        self.frame = Frame(master2)
-        self.lb1 = Label(master2,text='label1')
-        self.lb1.pack(side=TOP, anchor=NW)
+    def __init__(self,master,user):
+        master.geometry('400x300+250+50')
+        self.conteiner1 = Frame(master, bg='#FACC2E')
+        self.conteiner2 = Frame(master, bg='#848484')
+        self.conteiner3 = Frame(master, bg='#000000')
+
+        self.lb1 = Label(self.conteiner1, text='LB1')
+        self.lb2 = Label(self.conteiner2, text='LB2',bg='#848484')
+        self.lb3 = Label(self.conteiner3, text='LB3')
+
+        self.conteiner1.pack(side=TOP, fill=X)
+        self.conteiner2.pack(anchor=W)
+        self.conteiner3.pack(anchor=W)
+
+        self.lb1.pack()
+        self.lb2.pack()
+        self.lb3.pack()
+        dados = cursor.execute('select saldo from Credito where cod_credito=?', [user]).fetchall()
         '''
+        
+        self.lb1 = Label(self.conteiner1,text='Saldo:', bg='blue',fg='#fff')
+        self.saldo = Label(self.conteiner1,text=round(dados[0][0],2), bg='blue',fg='#fff')
+        self.logo = Label(self.conteiner1, text='FlashAdverts', bg='blue',fg='#fff')
+        self.conteiner1.pack(side=TOP, fill=X)
+        self.saldo.pack(side=RIGHT,anchor=E)
+        self.lb1.pack(side=RIGHT,anchor=E)
+        self.logo.pack(side=LEFT, anchor=W)
         self.frame =Frame(master)
         self.frame.grid()
         self.menu = Menu(master)
@@ -162,5 +182,5 @@ class Usuario:
         master.mainloop()
 
 root = Tk()
-Inicio(root)
+Usuario(root,None)
 root.mainloop()
