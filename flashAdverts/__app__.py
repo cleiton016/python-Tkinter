@@ -5,5 +5,5 @@ import Cria_anuncio
 root= Tk()
 #Cadastro.Cadastro(root)
 #usuario.Usuario(root)
-Cria_anuncio.Anuncio(root,'000.000.000-00')
+Cria_anuncio.Anuncio(root,2)
 root.mainloop()
